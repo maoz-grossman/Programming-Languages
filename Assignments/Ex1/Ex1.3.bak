@@ -1,0 +1,55 @@
+#lang pl
+
+#|///////////
+     Ex3
+////////////|#
+
+
+(define-type KeyStack
+  [ EmptyKS ]
+  [Push Symbol String KeyStack]
+  );;end define
+
+(: pop-stack : KeyStack -> (U KeyStack Boolean))
+(define (pop-stack KS)
+  (cases KS
+    [( EmptyKS ) #f]
+    [(Push sym str ks) ks])
+  );;end define
+
+(: search-stack : Symbol KeyStack -> (U Boolean String) )
+(define (search-stack symb KS)
+  (cases KS
+  [(EmptyKS) #f]
+  [(Push sym str ks)
+   (if (eq? sym symb)
+       str
+       (search-stack symb ks))]
+    );; end cases
+  );;end define
+
+
+
+#|////////////
+    TESTs
+/////////////|#
+
+(test (EmptyKS) => (EmptyKS))
+
+(test (Push 'b "B" (Push 'a "A" (EmptyKS))) =>
+ (Push 'b "B" (Push 'a "A" (EmptyKS))))
+
+(test (Push 'a "AAA" (Push 'b "B" (Push 'a "A" (EmptyKS))))
+=> (Push 'a "AAA" (Push 'b "B" (Push 'a "A" (EmptyKS)))))
+
+(test (pop-stack (Push 'a "AAA" (Push 'b "B" (Push 'a "A"
+(EmptyKS))))) => (Push 'b "B" (Push 'a "A" (EmptyKS))))
+
+(test (pop-stack (EmptyKS)) => #f)
+
+(test (search-stack 'c (Push 'a "AAA" (Push 'b "B" (Push 'a
+"A" (EmptyKS))))) => #f)
+
+(test (search-stack 'a (Push 'a "AAA" (Push 'b "B" (Push 'a
+"A" (EmptyKS))))) => "AAA")
+

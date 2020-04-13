@@ -53,6 +53,7 @@ of the list without is signum, unless it is 0 or has a negative coefficent.
   (cond 
     [(= coef 0) ""]
     [(= coef 1) (getXPowExpr pow)]
+    [(= coef -1) (string-append "-" (getXPowExpr pow) )];;to get -x^b
     [(= pow 0) (number->string coef)]
     [else (string-append (number->string coef) (getXPowExpr pow))]
     );;end cond
@@ -168,6 +169,8 @@ in a tail recutsive function, So I made something that is pretty close to factor
 (test(getSignum 0)=> "")
 
 (test (write-poly '(3 2 6)) => "3x^2+2x+6")
+(test (write-poly '(2 0 3)) => "2x^2+3")
+(test (write-poly '(-1 0 3)) => "-x^2+3")
 (test (write-poly '()) => "")
 (test (write-poly '(7 8 9 10)) => "7x^3+8x^2+9x+10")
 (test (write-poly '(1)) => "1")
@@ -175,6 +178,8 @@ in a tail recutsive function, So I made something that is pretty close to factor
 (test (write-poly '(-7 0 0 0)) => "-7x^3")
 (test (write-poly '(0)) => "")
 (test (write-poly '(-0)) => "")
+(test (write-poly '(-1)) => "-1")
+(test (write-poly '(-1 0 0 0)) => "-x^3")
 (test (write-poly '(0 0 0 -0 0)) => "")
 
 

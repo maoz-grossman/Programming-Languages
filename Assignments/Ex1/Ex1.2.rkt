@@ -29,6 +29,22 @@
 ///////////|#
 
 ;;2.1:
+#|
+Even after Ex1 I still don't feel like mastering the syntex of the language
+It was really hard to me to get used to the idea that the operations sign aren't
+ordered the same way I know, and that I don't give values to variables.
+But this exercise was actually smoother than the previous one, cause at least I knew
+where to search when I get stuck, and what is more relevant to the solution.
+In this exercise I tried to break down the problem into pices.
+For the first part I made a subfunction for every part of the desierd string of the solution.
+I made a function for the a monom expresion without a coefficent' and then made a function that add coefficient to
+the same monom. I tried to make it as generic as I could so it would take care for every edge case that may come.
+I also tested every function in every scenario I've could imagen.
+Also I made a function that add the signum "+" as preffix of the relevant monon(and it has a negative coefficient it returns "")
+In the end i gathered together all the valid monoms (with the signum) of the lists elements recursivly, and added the first element
+of the list without is signum, unless it is 0 or has a negative coefficent. 
+|#
+
 
 
 ;;Gets a coefficient the power of X, and returns its representing string.
@@ -94,6 +110,14 @@
 
 ;;2.2
 
+#| 2.2 was even smoother than 2.1,
+cause I already knew I to implement a Power function recursivly,
+ all I needed was to figure out how to Sum up all the monoms together into one number
+in a tail recutsive function, So I made something that is pretty close to factorial function
+ we saw in the second practical lesson.
+|#
+
+;;Recursive function to compute a power of a given integer
 (: power : Number Number -> Number)
 (define (power X pow)
   (if (= 0 pow)
@@ -111,7 +135,7 @@
 
 ;; compute a polynom expression using helper function
 (: compute-poly : Number (Listof Number)-> Number )
-(define (compute-poly X ls)
+(define (compute-poly X ls);; compute the sum of the monoms recursivly
   (: helper : Number (Listof Number)-> Number)
   (define (helper acc ls)
     (if

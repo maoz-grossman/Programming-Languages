@@ -4,6 +4,18 @@
        EX1
 /////////////////|#
 
+
+#|
+One of the difficulties is to get use to the synatax of the language
+I found out that the language is spaces sensitive,and some
+of the functions we learned in class aren't automatically installed
+so I had to build them from the ground up
+like the function EndsWith, i culdn't find any thing in the Help Desk,
+but I found the substring function which helped me a lot/
+Also I am not good with the way of thinking in recursive functions,
+I tried to make the functions as match close i could to a while loop form,
+GoTo style of implemtation
+|#
 #|Checks if a string ends with a given substring|#
 (: stringEndWith : String String -> Boolean)
 (define (stringEndWith S1 S2)

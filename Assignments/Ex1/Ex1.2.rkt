@@ -111,8 +111,8 @@ of the list without is signum, unless it is 0 or has a negative coefficent.
 
 ;;2.2
 
-#| 2.2 was even smoother than 2.1,
-cause I already knew I to implement a Power function recursivly,
+#| 2.2 went even smoother than 2.1,
+cause I already knew how to implement a Power function recursivly,
  all I needed was to figure out how to Sum up all the monoms together into one number
 in a tail recutsive function, So I made something that is pretty close to factorial function
  we saw in the second practical lesson.
@@ -181,6 +181,7 @@ in a tail recutsive function, So I made something that is pretty close to factor
 (test (write-poly '(-1)) => "-1")
 (test (write-poly '(-1 0 0 0)) => "-x^3")
 (test (write-poly '(0 0 0 -0 0)) => "")
+(test (write-poly '(-1 -1 -1 -1 0 -1 0 -1)) => "-x^7-x^6-x^5-x^4-x^2-1" )
 
 
 ;;2.2

@@ -52,8 +52,8 @@ of the list without is signum, unless it is 0 or has a negative coefficent.
 (define (Xexpr coef pow)
   (cond 
     [(= coef 0) ""]
-    [(= coef 1) (getXPowExpr pow)]
-    [(= coef -1) (string-append "-" (getXPowExpr pow) )];;to get -x^b
+    ;;[(= coef 1) (getXPowExpr pow)];; to get x^b
+    ;;[(= coef -1) (string-append "-" (getXPowExpr pow) )];;to get -x^b
     [(= pow 0) (number->string coef)]
     [else (string-append (number->string coef) (getXPowExpr pow))]
     );;end cond
@@ -63,7 +63,7 @@ of the list without is signum, unless it is 0 or has a negative coefficent.
 (: getXPowExpr : Number -> String)
 (define (getXPowExpr pow)
   (cond
-    [(= pow 0) "1"]
+    [(= pow 0) "1"];;although I don't need it right now, it may be useful in the future
     [(= pow 1) "x"]
     [else (string-append "x^" (number->string pow))]
     );;end cond
@@ -128,7 +128,7 @@ in a tail recutsive function, So I made something that is pretty close to factor
   );; end define
 
 
-;; Calculates the value of a given monom aX^3 when X is some real number b 
+;; Calculates the value of a given monom aX^b when X is some real number 
 (: calculateMonom : Number Number Number -> Number)
 (define (calculateMonom coef X pow )
   (* coef (power X pow))
@@ -162,15 +162,15 @@ in a tail recutsive function, So I made something that is pretty close to factor
 (test(Xexpr 15 34)=> "15x^34")
 (test(Xexpr -9 3)=> "-9x^3")
 (test(Xexpr 1 0)=> "1")
-(test(Xexpr 1 1)=> "x")
-(test(Xexpr 1 23)=> "x^23")
+(test(Xexpr 1 1)=> "1x")
+(test(Xexpr 1 23)=> "1x^23")
 (test(getSignum 10)=> "+")
 (test(getSignum -10)=> "")
 (test(getSignum 0)=> "")
 
 (test (write-poly '(3 2 6)) => "3x^2+2x+6")
 (test (write-poly '(2 0 3)) => "2x^2+3")
-(test (write-poly '(-1 0 3)) => "-x^2+3")
+(test (write-poly '(-1 0 3)) => "-1x^2+3")
 (test (write-poly '()) => "")
 (test (write-poly '(7 8 9 10)) => "7x^3+8x^2+9x+10")
 (test (write-poly '(1)) => "1")
@@ -179,9 +179,11 @@ in a tail recutsive function, So I made something that is pretty close to factor
 (test (write-poly '(0)) => "")
 (test (write-poly '(-0)) => "")
 (test (write-poly '(-1)) => "-1")
-(test (write-poly '(-1 0 0 0)) => "-x^3")
+(test (write-poly '(-1 0 0 0)) => "-1x^3")
+(test (write-poly '(-1 0 1 0)) => "-1x^3+1x")
 (test (write-poly '(0 0 0 -0 0)) => "")
-(test (write-poly '(-1 -1 -1 -1 0 -1 0 -1)) => "-x^7-x^6-x^5-x^4-x^2-1" )
+(test (write-poly '(-1 -1 -1 -1 0 -1 0 -1)) => "-1x^7-1x^6-1x^5-1x^4-1x^2-1" )
+
 
 
 ;;2.2

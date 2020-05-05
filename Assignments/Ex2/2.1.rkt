@@ -94,6 +94,7 @@
  (test (parse "{ reg-len = 2 { or {and {shl {1 0}} {1 0}} {1 0}}}") => (Or (And (Shl
 (Reg '(1 0))) (Reg '(1 0))) (Reg '(1 0))))
  (test (parse "{ reg-len = 4 {or {1 1 1 1} {0 1 1}}}") =error> "wrong number of bits in")
-(test (parse "{ reg-len = 4 {or {1 1 a 1} {0 1 1}}}") =error> "bad syntax in")
+(test (parse "{ reg-len = 4 {or {1 1 a 1} {0 1 1 1}}}") =error> "bad syntax in")
  (test (parse "{ reg-len = 0 {}}") =error> "length too short in")
+  (test (parse "{ reg-len = 3 {1 2 1}}") =error> "bad syntax in")
  (test (parse "{  = 3 {1 1 1}}") =error> "bad syntax in")

@@ -8,6 +8,7 @@ Ex2.4::
            |{LEAF <num>}
 
 |#
+
  (define-type BINTREE
    [Node  BINTREE  BINTREE]
    [Leaf Number])
@@ -33,10 +34,14 @@ Ex2.4::
  (tree-fold (inst append Number) (inst list Number)
 tree))
 
+  
+
 (: tree-reverse : BINTREE -> BINTREE)
 (define (tree-reverse Btree)
- (tree-fold Node Leaf (switch-node Btree)))
-
+   (: switch-nodes : BINTREE BINTREE -> BINTREE)
+  (define (switch-nodes L_node R_node)
+    (Node R_node L_node))
+  (tree-fold switch-nodes Leaf Btree))
 
 
 ;;Tests;;
@@ -50,3 +55,6 @@ tree))
 
 (test (equal? (reverse (tree-flatten (Node (Leaf 1) (Node (Leaf 2)(Leaf 3)))))
  (tree-flatten (tree-reverse (Node (Leaf 1) (Node (Leaf 2)(Leaf 3))))))=> #t )
+
+(test (tree-reverse (Node (Leaf 2) (Leaf 3)))  =>  (Node (Leaf 3) (Leaf 2)))
+(test (tree-reverse (Node (Leaf 1) (Node (Leaf 2) (Leaf 3))))  => (Node (Node (Leaf 3) (Leaf 2)) (Leaf 1)))

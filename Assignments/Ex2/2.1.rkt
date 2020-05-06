@@ -23,7 +23,7 @@
 ;; The actual interpreter
 
 #| BNF for the RegE language:
- <ROL> ::= {Len <num> <RegE>}
+ <ROL> ::= {reg-len = <num> <RegE>}
  <RegE> ::= {Reg <Bit-List>}
            |{Shl <RegE>}
            |{Or <RegE> <RegE>}

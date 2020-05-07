@@ -24,12 +24,27 @@
 
 #| BNF for the RegE language:
  <ROL> ::= {reg-len = <num> <RegE>}
- <RegE> ::= {Reg <Bit-List>}
-           |{Shl <RegE>}
-           |{Or <RegE> <RegE>}
-           |{And <RegE> <RegE>}
+ <RegE> ::= {reg {<Bit-List>}}
+           |{shl <RegE>}
+           |{or <RegE> <RegE>}
+           |{and <RegE> <RegE>}
  <Bits-List>::=<Bits>|<Bits><Bits-List>
- <Bits> ::= {0} | {1} 
+ <Bits> ::= 0 | 1
+
+
+For example:
+1. {reg-len = 2 {reg {1 0 1}}}
+ ROL => reg-len = <num> <RegE>
+  from <num> we derived 2
+  from <RegE> we derived {reg <Bit-List>}
+  from <Bit-List> we derived <Bits><Bits-List>
+  from <Bits> we derived 1
+  from <Bits-List> we derived <Bits> which became 0 and <Bits-List>
+  from the second <Bits-List> we derived <Bits> which became 1/
+
+2. 
+
+                                  
  |#
 
 

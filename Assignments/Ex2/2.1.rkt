@@ -9,16 +9,13 @@
    (define ( helper-listLength acc ls )
      (if (null? ls)
          acc
-     (helper-listLength (+ 1 acc) (rest ls ))
-      );end if
-    );end define  helper-listLength
-   (helper-listLength 0 ls )
- )
+         (helper-listLength (+ 1 acc) (rest ls ))));end define  helper-listLength
+   (helper-listLength 0 ls ));;end define listLength
 
 
 ;; Defining two new types
-(define-type BIT = (U 0 1))
-(define-type Bit-List = (Listof BIT))
+(define-type BIT = (U 0 1));;<Bits> ::= 0 | 1
+(define-type Bit-List = (Listof BIT));; <Bits-List>::=<Bits>|<Bits><Bits-List>
 
 ;; The actual interpreter
 
@@ -33,27 +30,73 @@
 
 
 For example:
-1. {reg-len = 2 {reg {1 0 1}}}
+1. {reg-len = 3 {reg {1 0 1}}}
  ROL => reg-len = <num> <RegE>
-  from <num> we derived 2
+  from <num> we derived 3
   from <RegE> we derived {reg <Bit-List>}
   from <Bit-List> we derived <Bits><Bits-List>
   from <Bits> we derived 1
   from <Bits-List> we derived <Bits> which became 0 and <Bits-List>
   from the second <Bits-List> we derived <Bits> which became 1/
 
-2. 
+                         ROL
+                         _|_____________________
+                        { reg-len = <num> <RegE>}
+                                      |     _|_______________
+                                      3     {reg {<Bit-List>}}
+                                                     _|_________
+                                                     1 <Bit-List>
+                                                         ____|______
+                                                         0 <Bit-List>
+                                                                |
+                                                                1
 
-                                  
- |#
+
+
+
+2. {reg-len = 1 {or {and {reg {1}} {reg {1}}}{shl {reg {0}}}}
+
+    ROL
+    _|_____________________
+    {reg-len = <num> <RegE>}
+                 |      _|_________________________________
+                 1     {or <RegE>                   <RegE>  }
+                    _________|_______               ___|_____
+                 {and <RegE>     <RegE>}           {shl <RegE>}
+                  ______|______      |____________      ___|________
+                 {reg <Bit-List>}   {reg <Bit-List>}   {reg <Bit-List>}
+                              |                 |                  |
+                              1                 1                  0
+
+
+
+
+3. {reg-len = 2 {and {shl {1 0}} {shl {0 0}}}}
+
+                             ROL
+                      ________|____________
+                   { reg-len = <num> <RegE>}
+                                |       |__________________
+                                2      {and <RegE>   <RegE>}
+                                         _____|___       |_________
+                                       {shl <RegE>}    {shl <RegE>}
+                                            ___|_______        |_______________
+                                         {reg {<Bit-List>}}    {reg {<Bit-List>}}
+                                                     |_________       _____|______
+                                                     1 <Bit-List>      0 <Bit-List>
+                                                         |                   |
+                                                         0                   0
+
+
+   |# 
 
 
 ;; RegE abstract syntax trees
 (define-type RegE
- [Reg Bit-List]
- [And RegE RegE]
- [Or RegE RegE]
- [Shl RegE])
+ [Reg Bit-List];;{reg {<Bit-List>}}
+ [And RegE RegE];;{and <RegE> <RegE>}
+ [Or RegE RegE] ;;{or <RegE> <RegE>}
+ [Shl RegE]);;{shl <RegE>} 
 
 
 ;; Next is a technical function that converts (casts)
@@ -101,6 +144,7 @@ For example:
 
  ;; tests
  (test (parse "{ reg-len = 4 {1 0 0 0}}") => (Reg '(1 0 0 0)))
+(test (parse "{ reg-len = 1 {1}}") => (Reg '(1)))
  (test (parse "{ reg-len = 4 {shl {1 0 0 0}}}") => (Shl (Reg '(1 0 0 0))))
  (test (parse "{ reg-len = 4 {and {shl {1 0 1 0}} {shl {1 0 1 0}}}}") => (And (Shl (Reg
 '(1 0 1 0))) (Shl (Reg '(1 0 1 0)))))

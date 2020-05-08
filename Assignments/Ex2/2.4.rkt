@@ -13,7 +13,8 @@ Ex2.4::
    [Node  BINTREE  BINTREE]
    [Leaf Number])
 
-(: tree-map : All(A) (Number -> Number) BINTREE -> BINTREE)
+(: tree-map : (Number -> Number) BINTREE -> BINTREE)
+;;Like map for lists- itrerates the tree and applaies the given function on the leaves
 (define (tree-map F Btree)
   (cases Btree
     [(Node L R) (Node (tree-map F L) (tree-map F R)) ]
@@ -22,6 +23,7 @@ Ex2.4::
 (: tree-fold : (All(A) (A A -> A) (Number -> A) BINTREE -> A))
 ;;It consumes a combiner function,
 ;;a numeric function, and an input BINTREE. It returns a value that is created
+;;Like foldl function of lists with no intial value but numeric function for leaves 
 (define (tree-fold func nfunc Btree)
   (cases Btree
   [(Node L R) (func (tree-fold func nfunc L)(tree-fold func nfunc R))]
@@ -37,6 +39,8 @@ tree))
   
 
 (: tree-reverse : BINTREE -> BINTREE)
+;; returns a tree that is a mirror image of the given tree
+;;that is replaces between the left and right sub-tree of the given tree
 (define (tree-reverse Btree)
    (: switch-nodes : BINTREE BINTREE -> BINTREE)
   (define (switch-nodes L_node R_node)

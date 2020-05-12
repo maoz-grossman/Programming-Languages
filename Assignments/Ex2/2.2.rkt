@@ -1,7 +1,19 @@
 #lang pl
+
 #|
 
 2.2.1
+
+
+In this exercise when I write AE I mean to the standart
+ AE we saw in class:
+
+<AE>::= <num>
+       |{+ <AE> <AE>}
+       |{- <AE> <AE>}
+       |{/ <AE> <AE>}
+       |{* <AE> <AE>}
+
 The problem  with such expression:
 {* {+ {set 1} {set 2}} get}
 is that this expression is ambiguity,
@@ -60,6 +72,75 @@ operation).
 yes by "{set <GAE>}" and the definition of <GAE>
 
 
-|#
+Lets test it:
 
+a.{seq {set {+ 78 567}}
+ {set {* get get}}
+ {/ get 23}}
+
+<MAE>
+_|___________________________________
+{seq     {set <AE>}         <Second>}
+            ____|___             ___|____________________________
+           {+ 78 567}           {set <GAE>}                <Second>
+                             __________|___________            |
+                           {<operator> <GAE> <GAE>}          <GAE>
+                               |         |     |      _________|___________
+                               *        get    get  {<operator> <GAE> <GAE>}
+                                                        |         |      |
+                                                        /        get    <AE>
+                                                                          |
+                                                                         23
+
+
+b. {seq {- 8 2}}
+
+<MAE>
+_|________
+{seq <AE>}
+     __|__
+    {- 8 2}
+
+
+
+c. {seq {set {* 1 {+ 4 5}}} {set {* get 34}}{+ get {+ 2 4}}}
+
+<MAE>
+_|___________________________________
+{seq     {set <AE>}         <Second>}
+            ____|____             ___|____________________________
+           {* 1 {+ 4 5}}         {set <GAE>}                <Second>
+                             __________|___________            |
+                           {<operator> <GAE> <GAE>}          <GAE>
+                               |         |     |      _________|___________
+                               *        get   <AE>  {<operator> <GAE> <GAE>}
+                                                |       |         |      |
+                                               34       /        get    <AE>
+                                                                          |
+                                                                       {+ 2 4}
+
+
+
+
+d. {seq {set {* 1 {* 5 5}}} {set {* get get}}{set {* get 2} {/ get 5}}}
+
+<MAE>
+_|___________________________________
+{seq     {set <AE>}         <Second>}
+            ____|______           ___|____________________________
+           {* 1 {* 5 5}}         {set <GAE>}                <Second>
+                             __________|___________     ________|________________________
+                           {<operator> <GAE> <GAE>}    {set <GAE>}                <Second> 
+                               |         |     |     _________|_____________         |
+                               *        get   get   {<operator> <GAE> <GAE>}       <GAE>
+                                                         |        |      |      ______|_______________
+                                                         *       get    <AE>   {<operator> <GAE> <GAE>}
+                                                                         |         |         |      |
+                                                                         2         /         get   <AE>
+                                                                                                     |
+                                                                                                     5
+                                                                   
+
+ 
+|#
 

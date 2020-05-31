@@ -1,29 +1,29 @@
   #lang pl
 
-  #| BNF for the WAE language:
-       <WAE> ::= (Listof <num>)
-               | { + <WAE> <WAE> }
-               | { - <WAE> <WAE> }
-               | { * <WAE> <WAE> }
-               | { / <WAE> <WAE> }
-               | {SQRT <WAE> <WAE>}
-               | { with { <id> <WAE> } <WAE> }
+  #| BNF for the MUWAE language:
+       <MUWAE> ::= (Listof <num>)
+               | { + <MUWAE> <MUWAE> }
+               | { - <MUWAE> <MUWAE> }
+               | { * <MUWAE> <MUWAE> }
+               | { / <MUWAE> <MUWAE> }
+               | {SQRT <MUWAE> <MUWAE>}
+               | { with { <id> <MUWAE> } <MUWAE> }
                | <id>
   |#
 
-  ;; WAE abstract syntax trees
-  (define-type WAE
+  ;; MUWAE abstract syntax trees
+  (define-type MUWAE
     [Num  (Listof Number)]
-    [Add  WAE WAE]
-    [Sub  WAE WAE]
-    [Mul  WAE WAE]
-    [Div  WAE WAE]
+    [Add  MUWAE MUWAE]
+    [Sub  MUWAE MUWAE]
+    [Mul  MUWAE MUWAE]
+    [Div  MUWAE MUWAE]
     [Id   Symbol]
-    [Sqrt WAE]
-    [With Symbol WAE WAE])
+    [Sqrt MUWAE]
+    [With Symbol MUWAE MUWAE])
 
-  (: parse-sexpr : Sexpr -> WAE)
-  ;; to convert s-expressions into WAEs
+  (: parse-sexpr : Sexpr -> MUWAE)
+  ;; to convert s-expressions into MUWAEs
   (define (parse-sexpr sexpr)
     (match sexpr
       [(number: n) (Num (list n))]
@@ -43,13 +43,13 @@
 
 
 
-  (: parse : String -> WAE)
-  ;; parses a string containing a WAE expression to a WAE AST
+  (: parse : String -> MUWAE)
+  ;; parses a string containing a MUWAE expression to a MUWAE AST
   (define (parse str)
     (parse-sexpr (string->sexpr str)))
 
   #| Formal specs for `subst':
-     (`N' is a <num>, `E1', `E2' are <WAE>s, `x' is some <id>, `y' is a
+     (`N' is a <num>, `E1', `E2' are <MUWAE>s, `x' is some <id>, `y' is a
      *different* <id>)
         N[v/x]                = N
         {+ E1 E2}[v/x]        = {+ E1[v/x] E2[v/x]}
@@ -62,7 +62,7 @@
         {with {x E1} E2}[v/x] = {with {x E1[v/x]} E2}
   |#
 
-  (: subst : WAE Symbol WAE -> WAE)
+  (: subst : MUWAE Symbol MUWAE -> MUWAE)
   ;; substitutes the second argument with the third argument in the
   ;; first argument, as per the rules of substitution; the resulting
   ;; expression contains no free instances of the second argument
@@ -121,8 +121,8 @@ input: ~s" (first ns))]
 
 
 
-  (: eval : WAE -> (Listof Number))
-  ;; evaluates WAE expressions by reducing them to numbers
+  (: eval : MUWAE -> (Listof Number))
+  ;; evaluates MUWAE expressions by reducing them to numbers
   (define (eval expr)
     (cases expr
       [(Num n)  n]
@@ -138,7 +138,7 @@ input: ~s" (first ns))]
       [(Id name) (error 'eval "free identifier: ~s" name)]))
 
   (: run : String -> (Listof Number))
-  ;; evaluate a WAE program contained in a string
+  ;; evaluate a MUWAE program contained in a string
   (define (run str)
     (eval (parse str)))
 

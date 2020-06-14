@@ -119,8 +119,7 @@ It took us a day to figure out we wrote (eval m) twice
          [(list 'if cond (list 'then-do to-do ) (list 'else-do  else-to-do))
           (If (parse-sexpr cond) (parse-sexpr to-do) (parse-sexpr else-to-do))]
          [else (error 'parse-sexpr "bad `if' syntax in ~s" sexpr)])] 
-      ;;[else (run "{Not (> 2 3)}")(error 'parse-sexpr "bad syntax in ~s" sexpr)]
-      ))
+      [else (error 'parse-sexpr "bad syntax in ~s" sexpr)]))
 
 
 
@@ -254,11 +253,11 @@ It took us a day to figure out we wrote (eval m) twice
                   {with {x 3}
                     {call add1 {call add3 x}}}}}")
         => 7)
-;;(test (run "{call {fun {x} {+ x \"1"}} 4}")
-      ;;  =error> "string->sexpr: syntax error")
-(test (run "{fun {x}}") =error> "bad `fun' syntax in" )
-;;(test (run "{call add1}" ) =error> " bad syntax in" )
-
+(test (run "{with {add3 {fun {x} {+ x 3}}}
+                {with {add1 True}
+                  {with {x 3}
+                    {call add1 {call add3 x}}}}}")
+        =error> "eval: `call' expects a function, got:")
 
 (test (run "5") => 5)
   (test (run "{+ 5 5}") => 10)
@@ -306,11 +305,20 @@ It took us a day to figure out we wrote (eval m) twice
 (test (run "False") => false )
 (test (logic-op = (Num 2) (Num 3)) => (Bool false))
 (test (flang->bool (Num 2)) =error> "flang->bool: expects a boolean, got")
-(test (let ([cond (flang->bool (eval (Bigger (Num 0) (Num 1))))])
-         (if (eq? cond true) (eval (Num 0)) (eval (Add (Num 2) (Num 2)))))
-      => (Num 4))
 (test (run "{with {x 0} {not {> x 2}}}") => true)
 (test (eval (Num 0)) => (Num 0))
 (test (eval (Bool true)) => (Bool true))
 (test (eval (Not(Bool true))) => (Bool false))
+(test  (run "{with {x  True } x}")=> true )
+(test  (run "{with {x  True } False}")=> false )
+(test  (run "{with {x  True } {not x}}")=> false )
 (test (run "{not {not True}}")=> true)
+(test (run "{call {fun {} {+ x 1}} 4}") =error> "parse-sexpr: bad `fun' syntax in"  )
+(test  (run "{with {x {not False }} x}")=> true )
+(test (run "{call {x {4}} 4 }") =error> "parse-sexpr: bad syntax in")
+(test  (run "{with {x {= 2 2}} x}")=> true )
+(test  (run "{with {x {< 2 3}} x}")=> true )
+(test  (run "{with {x {> 2 3}} x}")=> false )
+(test  (run "{with {x 2} {> x 3}}")=> false )
+(test  (run "{with {x 2} {= x 3}}")=> false )
+(test  (run "{with {x 2} {< x 3}}")=> true )

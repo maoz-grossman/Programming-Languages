@@ -3,6 +3,24 @@
 #lang pl
 
 #|
+Contrary to what I thought,
+the assignment didn't take me too long (about four hours in aggregate),
+and that's also because I got stuck on
+the part of the createGlobalEnv function and the part of Call2 in eval.
+Initially, I was confident in my implamentetion of the code,
+I got to the part of the createGlobalEnv function relatively quickly,
+and after about half an hour I also figured out how to insert a FunV2 variable into Extend
+(after lots of trial and error on the interpreter).
+When I ran the code at the end ,each time I got the same error:
+lookup: no binding for x
+So when I realized that he couldn't get the variable x out of the cartridge,
+I tried changing the part of eval on Call2 several times until finally,
+after researching the Evaluation rules several times
+and with the help of a friend,
+I managed to change it to what it is now.
+|#
+
+#|
  #| The grammar:
 <FLANG> ::= <num>
  | { with { <id> <FLANG> } <FLANG> }
@@ -39,9 +57,9 @@
   [Id   Symbol]
   [With Symbol FLANG FLANG]
   [Fun  Symbol FLANG]
-  [Fun2  Symbol Symbol FLANG]
+  [Fun2  Symbol Symbol FLANG];for two parameters functions (f(x y){#Body#})
   [Call FLANG FLANG]
-  [Call2 FLANG FLANG FLANG])
+  [Call2 FLANG FLANG FLANG]); For calling a Fun2 type
 
 (: parse-sexpr : Sexpr -> FLANG)
 ;; to convert s-expressions into FLANGs
@@ -59,19 +77,24 @@
        [(list 'fun (list (symbol: name)) body)
         (Fun name (parse-sexpr body))]
        [(list 'fun (list (symbol: name) (symbol: name2)) body)
-        (Fun2 name name2 (parse-sexpr body))]
+        (Fun2 name name2 (parse-sexpr body))] ;; Fun2 has two parameters 
        [else (error 'parse-sexpr "bad `fun' syntax in ~s" sexpr)])]
 
- #|
+    #|
+    We will not use the following functions:
     [(list  '+ lhs rhs) (Add (parse-sexpr lhs) (parse-sexpr rhs))]
     [(list  '- lhs rhs) (Sub (parse-sexpr lhs) (parse-sexpr rhs))]
     [(list  '* lhs rhs) (Mul (parse-sexpr lhs) (parse-sexpr rhs))]
     [(list  '/ lhs rhs) (Div (parse-sexpr lhs) (parse-sexpr rhs))]
+    Instead we will  call the types through a global variable which is
+    called by a Call type
 |#
     [(cons 'call more)
      (match sexpr
        [(list 'call fun arg) (Call (parse-sexpr fun) (parse-sexpr arg))]
+       ;;(like {call fun{x}{#Body#} arg})
        [(list 'call fun arg1 arg2)(Call2 (parse-sexpr fun)(parse-sexpr arg1)(parse-sexpr arg2))])]
+    ;;(like {call {fun{x y}{#Body#}}arg1 arg2})
     [else (error 'parse-sexpr "bad syntax in ~s" sexpr)]))
 
 (: parse : String -> FLANG)
@@ -82,15 +105,18 @@
 ;; Types for environments, values, and a lookup function
 
 (define-type ENV
+  ;;Stack type used for global variables
   [EmptyEnv]
   [Extend Symbol VAL ENV])
 
 (define-type VAL
+  ;;We need it to change the program to static model
   [NumV Number]
   [FunV Symbol FLANG ENV]
   [FunV2 Symbol Symbol FLANG ENV])
 
 (: lookup : Symbol ENV -> VAL)
+;;Finds the value of the variable by its symbol in the stuck.
 (define (lookup name env)
   (cases env
     [(EmptyEnv) (error 'lookup "no binding for ~s" name)]
@@ -132,30 +158,36 @@
          [(FunV bound-id bound-body f-env)
           (eval bound-body
                 (Extend bound-id (eval arg-expr env) f-env))]
+         ;;We expected to get one function parameter and we got two->error
          [(FunV2 bound-id bound-id2 bound-body f-env)
           (error 'eval "expected two arguments, got one in: ~s"
                  fval)]
+         ;;else we got a noun function type->error
          [else (error 'eval "`call' expects a function, got: ~s"
                       fval)]))]
-
-    
     [(Call2 fun-expr arg-expr1 arg-expr2)
      (let ([fval (eval fun-expr env)])
        (cases fval
-       [(FunV2 bound-id1 bound-id2 bound-body f-env)
-        (eval bound-body
-              (Extend bound-id2 (eval arg-expr2 env)
-                                      (Extend bound-id1 (eval arg-expr1 env) f-env)))]
+         [(FunV2 bound-id1 bound-id2 bound-body f-env)
+          (eval bound-body
+                (Extend bound-id2 (eval arg-expr2 env)
+                        (Extend bound-id1 (eval arg-expr1 env) f-env)))]
+         ;;We expected to get two function parameters and we got one->error
          [(FunV bound-id bound-body f-env)
           (error 'eval "expected a single argument, got two in: ~s"
                  fval)]
+         ;;else we got a noun function type->error
          [else  (error 'eval "`call' expects a function, got: ~s"
                        fval)]))]))
 
 
 (: createGlobalEnv : -> ENV)
+;;We'll save the types:
+;;Add, Sub, Mul, Div
+;;as global Funv2 functions throughout the program
+;;in a global ENV which will be recived from the function
 (define (createGlobalEnv)
-(Extend '+ (FunV2 'x 'y (Add (Id 'x) (Id 'y)) (EmptyEnv))
+  (Extend '+ (FunV2 'x 'y (Add (Id 'x) (Id 'y)) (EmptyEnv))
           (Extend '- (FunV2 'x 'y (Sub (Id 'x) (Id 'y)) (EmptyEnv))
                   (Extend '* (FunV2 'x 'y (Mul (Id 'x) (Id 'y)) (EmptyEnv))
                           (Extend '/ (FunV2 'x 'y (Div (Id 'x) (Id 'y)) (EmptyEnv))(EmptyEnv))))))
@@ -165,6 +197,8 @@
 (: run : String -> Number)
 ;; evaluate a FLANG program contained in a string
 (define (run str)
+  ;;instead of using EmptyEnv we will use a pre-made stack
+  ;;from createGlobalEnv function
   (let ([result (eval (parse str) (createGlobalEnv))])
     (cases result
       [(NumV n) n]
@@ -227,34 +261,36 @@
                 {with {f {fun {y} {call + x y}}}
                   {with {x 5}
                     {call f 4}}}}")
-      => 7) ;; the example we considered for subst-caches
+      => 7) 
 (test (run "{call {with {x 3}
                       {fun {y} {call + x y}}}
                     4}")
       => 7)
 (test (run "{with {add3 {fun {x} {call + x 3}}} {with {x 3} add3}}") =error> "evaluation returned a non-number")
+
+
 (test (run "{call + 4 5}") => 9)
- (test (run "{with {add3 {fun {x} {call + x 3}}}
+(test (run "{with {add3 {fun {x} {call + x 3}}}
  {call add3 1}}")
- => 4)
+      => 4)
 (test (run "{with {x 3}
  {with {f {fun {y} {call + x y}}}
  {with {x 5}
  {call f 4}}}}")
- => 7)
- (test (run "{call {fun {x y} {call + x { call - y 1}}} 4 2}") => 5)
- (test (run "{with {first {fun {x y} x}}
+      => 7)
+(test (run "{call {fun {x y} {call + x { call - y 1}}} 4 2}") => 5)
+(test (run "{with {first {fun {x y} x}}
  {with {second {fun {x y} y}}
  {call first {call second 2 123} 124}}}")
- => 123)
- (test (run "{+ 4 5}") =error> "parse-sexpr: bad syntax in")
- (test (run "{* 4 5}") =error> "parse-sexpr: bad syntax in")
- (test (run "{with {add3 {fun {x} {call + x 3}}}
+      => 123)
+(test (run "{+ 4 5}") =error> "parse-sexpr: bad syntax in")
+(test (run "{* 4 5}") =error> "parse-sexpr: bad syntax in")
+(test (run "{with {add3 {fun {x} {call + x 3}}}
  {call add3 1 2}}")
- =error> "expected a single argument, got two in: ")
- (test (run "{with {add3 {fun {x stam} {call + x 3}}}
+      =error> "expected a single argument, got two in: ")
+(test (run "{with {add3 {fun {x stam} {call + x 3}}}
  {call add3 1}}")
- =error> "expected two arguments, got one in: ")
+      =error> "expected two arguments, got one in: ")
 (test (run "{with {add3 {fun {x y} {call + x 3}}}
                 {with {add1 3}
                   {with {x 3}
